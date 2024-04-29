@@ -29,10 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mylibrary.IMyService
+import com.example.mylibrary.MyService
 import com.example.practiceaidl.ui.theme.PracticeAIDLTheme
 
 class MainActivity : ComponentActivity() {
-  // TODO("Should store a remote service's binder here!")
+  var remoteService : IMyService? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -44,15 +46,42 @@ class MainActivity : ComponentActivity() {
   }
   override fun onStart() {
     super.onStart()
-    TODO("BindService using intent here!")
+    Intent(this, MyService::class.java).also {
+      bindService(it, connection, BIND_AUTO_CREATE)
+    }
   }
   override fun onStop() {
     super.onStop()
-    TODO("UnbindService here!")
+    unbindService(connection)
   }
 
   fun getRandomString(length : Int) : String {
-    TODO("Call function of the remote service")
+    val defaultRet = "Remote Service Not Ready!"
+    return try {
+      remoteService?.genRanStr(length) ?: defaultRet
+    } catch (e : RemoteException) {
+      defaultRet
+    }
+  }
+
+  private val connection = object : ServiceConnection {
+    override fun onServiceConnected(name: ComponentName, service: IBinder) {
+      Toast.makeText(
+        this@MainActivity,
+        "Connected to remote service!",
+        Toast.LENGTH_SHORT
+      ).show()
+      remoteService = IMyService.Stub.asInterface(service)
+    }
+
+    override fun onServiceDisconnected(name: ComponentName) {
+      Toast.makeText(
+        this@MainActivity,
+        "Disconnected to remote service!!!",
+        Toast.LENGTH_LONG
+      ).show()
+      remoteService = null
+    }
   }
 }
 

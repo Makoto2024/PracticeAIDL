@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "PracticeAIDL"
 include(":app")
 include(":aidlserviceapp")
+include(":mylibrary")
